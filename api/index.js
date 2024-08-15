@@ -7,10 +7,12 @@ import authRoute from './routes/auth.js'
 import usersRoute from './routes/users.js'
 import roomsRoute from './routes/rooms.js'
 import hotelsRoute from './routes/hotel.js'
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
 const app = express();
+app.use(cookieParser())
 app.use(json());
 app.use(cors());
 app.use(helmet());
