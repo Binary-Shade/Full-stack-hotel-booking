@@ -5,6 +5,8 @@ import { verifyAdmin, verifyToken, verifyUser } from "../utils/verifyToken.js";
 const router = Router()
 
 // AUTH
+router.get('/checkAuth', verifyToken)
+
 router.get('/checkUser/:id', verifyUser, (req, res)=>{
     res.send("you are a good user")
 })
@@ -13,16 +15,16 @@ router.get('/checkAdmin/:id', verifyAdmin, (req, res)=>{
 })
 
 // UPDATE
-router.put('/:id', updateUser)
+router.put('/:id',verifyUser, updateUser)
 
 // DELETE
-router.delete('/:id', deleteUser)
+router.delete('/:id',verifyUser, deleteUser)
 
 // GET 
-router.get('/:id', getUser)
+router.get('/:id',verifyUser, getUser)
 
 // GET ALL
-router.get('/', getAllUser)
+router.get('/',verifyUser, getAllUser)
 
 
 export default router
