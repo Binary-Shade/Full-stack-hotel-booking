@@ -49,14 +49,16 @@ export const getHotel = async (req, res, next) =>{
     }
 }
 // get all
-export const getAllHotel = async (req, res, next) =>{
+export const getAllHotel = async (req, res, next) => {
     try {
-        const hotels = await Hotel.find()
-        res.status(200).json(hotels)
-    }catch(err){
-        next(err)
+        const { limit, ...others } = req.query; 
+        const hotels = await Hotel.find(...others).limit(Number(limit) || 10); 
+        res.status(200).json(hotels);
+    } catch (err) {
+        next(err); 
     }
 }
+
 // Count by city
 export const countByCity = async (req, res, next) =>{
     const cities = req.query.cities.split(',')
@@ -70,19 +72,38 @@ export const countByCity = async (req, res, next) =>{
     }
 }
 // Count by type
-export const countByType = async (req, res, next) =>{
-    const hotel = await Hotel.countDocuments({type: 'Hotel'})
-    const apart = await Hotel.countDocuments({type: 'Apartments'})
-    const resorts = await Hotel.countDocuments({type: 'Resorts'})
-    const hotel = await Hotel.countDocuments({type: 'Hotel'})
+export const countByType = async (req, res, next) => {
     try {
-        const list =await Promise.all(cities.map(city=>{
-            return Hotel.countDocuments({city: city})
-        }))
-        res.status(200).json(list)
-    }catch(err){
-        next(err)
+        // Perform the aggregation to group and count the documents by type
+        const counts = await Hotel.aggregate([
+            {
+                $group: {
+                    _id: "$type",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Define the fixed order of types
+        const typeOrder = ["hotel", "apartment", "resort", "villa", "cabin"];
+
+        // Create a map to easily access counts by type
+        const countMap = counts.reduce((acc, item) => {
+            acc[item._id.toLowerCase()] = item.count;
+            return acc;
+        }, {});
+
+        // Map the results in the desired order
+        const formattedCounts = typeOrder.map(type => ({
+            type: type,
+            count: countMap[type] || 0 // Default to 0 if the type is not in the countMap
+        }));
+
+        res.status(200).json(formattedCounts);
+    } catch (err) {
+        next(err);
     }
-}
+};
+
 
 
