@@ -14,7 +14,8 @@
       display: flex;
 
       h1 {
-        color: lightgray;
+        color: rgb(0, 0, 0);
+        text-transform: capitalize;
         font-size: 20px;
       }
 
@@ -37,6 +38,7 @@
         form {
           display: flex;
           flex-wrap: wrap;
+          width: 60%;
           gap: 30px;
           justify-content: space-between;
 

@@ -1,77 +1,110 @@
 export const userInputs = [
     {
-      id: 1,
+      id: 'username',
       label: "Username",
       type: "text",
       placeholder: "john_doe",
     },
     {
-      id: 2,
-      label: "Name and surname",
-      type: "text",
-      placeholder: "John Doe",
-    },
-    {
-      id: 3,
+      id: 'email',
       label: "Email",
-      type: "mail",
-      placeholder: "john_doe@gmail.com",
+      type: "email",
+      placeholder: "John_Doe@gmail.com",
     },
     {
-      id: 4,
+      id: 'phone',
       label: "Phone",
       type: "text",
       placeholder: "+1 234 567 89",
     },
     {
-      id: 5,
+      id: 'password',
       label: "Password",
       type: "password",
     },
     {
-      id: 6,
-      label: "Address",
-      type: "text",
-      placeholder: "Elton St. 216 NewYork",
-    },
-    {
-      id: 7,
+      id: 'country',
       label: "Country",
       type: "text",
-      placeholder: "USA",
+      placeholder: "United states",
+    },
+    {
+      id: 'city',
+      label: "City",
+      type: "text",
+      placeholder: "Golden streets",
     },
   ];
   
-  export const productInputs = [
+  export const hotelInputs = [
     {
-      id: 1,
+      id: 'name',
+      label: "Name",
+      type: "text",
+      placeholder: "my hotel",
+    },
+    {
+      id: 'type',
+      label: "Type",
+      type: "text",
+      placeholder: "hotel type",
+    },
+    {
+      id: 'city',
+      label: "City",
+      type: "text",
+      placeholder: "new york",
+    },
+    {
+      id: 'address',
+      label: "Address",
+      type: "text",
+      placeholder: "Peter street",
+    },
+    {
+      id: 'distance',
+      label: "Distance from center",
+      type: "text",
+      placeholder: "500m",
+    },
+    {
+      id: 'title',
       label: "Title",
       type: "text",
-      placeholder: "Apple Macbook Pro",
+      placeholder: "Five start hotel",
     },
     {
-      id: 2,
-      label: "Description",
+      id: 'desc',
+      label: "Descriptiom",
       type: "text",
-      placeholder: "Description",
+      placeholder: "hotel description",
     },
     {
-      id: 3,
-      label: "Category",
+      id: 'cheapestPrice',
+      label: "hotel price",
       type: "text",
-      placeholder: "Computers",
-    },
-    {
-      id: 4,
-      label: "Price",
-      type: "text",
-      placeholder: "100",
-    },
-    {
-      id: 5,
-      label: "Stock",
-      type: "text",
-      placeholder: "in stock",
+      placeholder: "210",
     },
   ];
-  
+
+  export const roomInputs = [{
+    id: 'title',
+    label: "Title",
+    type: "text",
+    placeholder: "my room",
+  },{
+    id: 'desc',
+    label: "Description",
+    type: "text",
+    placeholder: "good looking room",
+  },{
+    id: 'price',
+    label: "Price",
+    type: "text",
+    placeholder: "100",
+  },{
+    id: 'maxpeople',
+    label: "maximum-people",
+    type: "text",
+    placeholder: "2",
+  },]
