@@ -50,12 +50,14 @@
   
   .hotelImages {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: space-between;
   }
   
   .hotelImgWrapper {
-    width: 33%;
+    width: 400px;
+    display: flex;
+    gap: 20px;
   }
   
   .hotelImg {

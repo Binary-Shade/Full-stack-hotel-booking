@@ -9,6 +9,10 @@
     background-size: cover;
   }
   
+  .headerTitle {
+    color: white;
+  }
+
   .headerContainer {
     width: 100%;
     max-width: 1024px;
@@ -38,7 +42,9 @@
   }
   
   .headerDesc {
+    font-weight: 400;
     margin: 20px 0px;
+    color: #c6cacc;
   }
   
   .headerBtn {

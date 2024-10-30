@@ -8,7 +8,7 @@
   
   .pListItem{
     flex:1;
-    border-radius: 10px;
+    border-radius: 7px;
     overflow: hidden;
     cursor: pointer;
   }
@@ -20,6 +20,7 @@
   }
   
   .pListTitles>h1{
+    text-transform: capitalize;
     font-size: 18px;
     color: #444;
   }

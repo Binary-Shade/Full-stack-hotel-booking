@@ -32,15 +32,21 @@
     font-weight: 500;
   }
   
-  .fpRating>button{
-    background-color: #003580;
-    color: white;
-    border: none;
-    padding: 3px;
-    margin-right: 10px;
-    font-weight: bold;
-  }
+  .fpRating {
+    display: flex;
+    gap: 10px;
+    height: max-content;
+ }
   
+  .whole {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    color: gold;
+  }
+
   .fpRating>span{
     font-size: 14px;
   }

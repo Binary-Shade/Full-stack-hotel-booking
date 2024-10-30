@@ -1,4 +1,5 @@
 .listContainer {
+  color: rgb(122, 120, 120);
     display: flex;
     justify-content: center;
     margin-top: 20px;
@@ -13,9 +14,9 @@
   
   .listSearch {
     flex: 1;
-    background-color: #febb02;
+    background-color: #3f267e;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 4px;
     position: sticky;
     top: 10px;
     height: max-content;
@@ -23,7 +24,7 @@
   
   .lsTitle{
     font-size: 20px;
-    color: #555;
+    color: #bbb4b4;
     margin-bottom: 10px;
   }
   
@@ -60,7 +61,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
-    color: #555;
+    color: #f4f0f0;
     font-size: 12px;
   }
   

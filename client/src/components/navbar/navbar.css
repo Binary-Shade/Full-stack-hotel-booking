@@ -1,20 +1,39 @@
 .navbar{
     height: 50px;
-    background-color: #2614cc;
+    width: 100%;
+    background-color: #003580;
     display: flex;
     justify-content: center;
-    place-items: center;
+    align-items: center;
   }
   
   .navContainer{
-    width: 100%;
+    width: 50%;
     max-width: 1024px;
     color: white;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
+    
   }
   
+  .profile{
+    /* color: rgb(0, 0, 0); */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-transform: capitalize;
+    width: 200px;
+  }
+
+.name {
+  display: flex;
+  width: 50%;
+  color: aliceblue;
+}
+
   .logo{
     font-weight: 500;
   }

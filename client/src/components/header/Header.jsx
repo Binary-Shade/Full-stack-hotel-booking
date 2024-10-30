@@ -2,12 +2,14 @@
   import { FaPerson } from "react-icons/fa6";
   import "./header.css";
   import { DateRange } from "react-date-range";
-  import { useState } from "react";
+  import { useContext, useState } from "react";
   import "react-date-range/dist/styles.css"; // main css file
   import "react-date-range/dist/theme/default.css"; // theme css file
   import { format } from "date-fns";
   import { useNavigate } from "react-router-dom";
   import { FaLongArrowAltRight } from "react-icons/fa";
+import { SearchContext } from "../../context/searchContext";
+import { AuthContext } from "../../context/AuthContext";
 
   const Header = ({ type }) => {
     const [destination, setDestination] = useState("");
@@ -28,6 +30,8 @@
   
     const navigate = useNavigate();
   
+    const {dispatch} = useContext(SearchContext)
+
     const handleOption = (name, operation) => {
       setOptions((prev) => {
         return {
@@ -38,9 +42,13 @@
     };
   
     const handleSearch = () => {
+      dispatch({type: "NEW_SEARCH", payload: {destination, date, options}})
       navigate("/hotels", { state: { destination, date, options } });
     };
   
+    const {user} = useContext(AuthContext);
+
+
     return (
       <div className="header">
         <div
@@ -73,13 +81,15 @@
           {type !== "list" && (
             <>
               <h1 className="headerTitle">
-                A lifetime of discounts? It's Genius.
+                <span style={{color:'white'}}>A lifetime of discounts? </span>It's right choice !
               </h1>
               <p className="headerDesc">
                 Get rewarded for your travels – unlock instant savings of 10% or
-                more with a free Lamabooking account
+                more with a free BookNrest account
               </p>
-              <button className="headerBtn">Sign in / Register</button>
+              {
+                !user && <button className="headerBtn">Sign in / Register</button>
+              }
               <div className="headerSearch">
                 <div className="headerSearchItem">
                   <FaBed />

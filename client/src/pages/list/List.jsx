@@ -6,14 +6,22 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { DateRange } from "react-date-range";
 import SearchItem from "../../components/searchItem/SearchItem";
+import useFetch from "../../hooks/useFetch";
 
 const List = () => {
   const location = useLocation();
+  console.log(location);
 const [destination, setDestination] = useState(location.state?.destination || "");
 const [date, setDate] = useState(location.state?.date || [{ startDate: new Date(), endDate: new Date() }]);
 const [openDate, setOpenDate] = useState(false);
 const [options, setOptions] = useState(location.state?.options || { adult: 1, children: 0, room: 1 });
+const [min, setMin] = useState(undefined)
+const [max, setMax] = useState(undefined)
+const {data, loading, error, reFetch} = useFetch(`/api/hotels?city=${destination}&min=${min || 0}&max=${max || 999}`)
 
+const handleSearch = () =>{
+  reFetch()
+}
 
   return (
     <div>
@@ -25,7 +33,7 @@ const [options, setOptions] = useState(location.state?.options || { adult: 1, ch
             <h1 className="lsTitle">Search</h1>
             <div className="lsItem">
               <label>Destination</label>
-              <input placeholder={destination} type="text" />
+              <input placeholder={destination} type="text" value={destination} onChange={(e)=>setDestination(e.target.value)} />
             </div>
             <div className="lsItem">
               <label>Check-in Date</label>
@@ -48,13 +56,13 @@ const [options, setOptions] = useState(location.state?.options || { adult: 1, ch
                   <span className="lsOptionText">
                     Min price <small>per night</small>
                   </span>
-                  <input type="number" className="lsOptionInput" />
+                  <input type="number" onChange={(e)=>setMin(e.target.value)} className="lsOptionInput" />
                 </div>
                 <div className="lsOptionItem">
                   <span className="lsOptionText">
                     Max price <small>per night</small>
                   </span>
-                  <input type="number" className="lsOptionInput" />
+                  <input type="number" onChange={(e)=>setMax(e.target.value)} className="lsOptionInput" />
                 </div>
                 <div className="lsOptionItem">
                   <span className="lsOptionText">Adult</span>
@@ -85,19 +93,19 @@ const [options, setOptions] = useState(location.state?.options || { adult: 1, ch
                 </div>
               </div>
             </div>
-            <button>Search</button>
+            <button onClick={handleSearch}>Search</button>
           </div>
-          <div className="listResult">
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-            <SearchItem />
-          </div>
+          {
+            loading ? "loading ..." : (
+              <div className="listResult">
+                {
+                  data.map(item=>(
+                    <SearchItem key={item._id} item={item}/>
+                  ))
+                }
+              </div>
+            )
+          }
         </div>
       </div>
     </div>

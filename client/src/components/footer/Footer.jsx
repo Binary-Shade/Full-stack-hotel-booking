@@ -1,6 +1,8 @@
 import "./footer.css";
 
 const Footer = () => {
+  const year = new Date().getFullYear()
+
   return (
     <div className="footer">
       <div className="fLists">
@@ -44,7 +46,7 @@ const Footer = () => {
           <li className="fListItem">Terms & conditions</li>
         </ul>
       </div>
-      <div className="fText">Copyright © 2022 Lamabooking.</div>
+      <div className="fText">Copyright © {year} BookNRest</div>
     </div>
   );
 };
