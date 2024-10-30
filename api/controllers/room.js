@@ -16,7 +16,7 @@ export const createRoom = async (req, res, next) => {
         } catch (error) {
             next(error)
         }
-        res.status(200).json(saveRoom)
+        res.status(200).json('room created')
     } catch (error) {
        next(error) 
     }
@@ -35,6 +35,28 @@ export const updateRoom = async (req, res, next) =>{
     }catch(err){
         next(err)
     }
+}
+//update dates
+export const updateAvailability = async (req, res, next) =>{
+    const id = req.params.id
+    console.log(id);
+    console.log(req.body.dates);
+    try {
+        await Room.updateOne({
+            'roomNumbers._id': id
+        }, {
+            $push: {
+                'roomNumbers.$.unavailableDates': req.body.dates
+            }
+        })
+        res.status(200).json('dates updated successfully')
+    }catch(err){
+        next(err)
+    }
+}
+
+export const available =async ( req, res, next) =>{
+    res.json({message: 'love'})
 }
 
 // delete

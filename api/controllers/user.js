@@ -1,4 +1,5 @@
 import User from '../models/User.js'
+import {v2 as cloudinary} from 'cloudinary'
 
 //update
 export const updateUser = async (req, res, next) =>{
@@ -47,4 +48,16 @@ export const getAllUser = async (req, res, next) =>{
     }
 }
 
+export const upload = async (req, res, next)=>{
+    try{
+        const response = await cloudinary.uploader.upload("https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg", 
+            {
+                public_id: 'shoes',
+            }
+        )
+        res.json(response)
+    }catch(err){
+        res.json(err)
+    }
+}
 

@@ -8,26 +8,31 @@ import usersRoute from './routes/users.js'
 import roomsRoute from './routes/rooms.js'
 import hotelsRoute from './routes/hotel.js'
 import cookieParser from 'cookie-parser';
+import {v2 as cloudinary} from 'cloudinary'
 
 dotenv.config();
 
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.CLOUD_SECRET
+})
+
+
 const app = express();
-app.use(cookieParser());
+app.use(cookieParser())
 app.use(json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+}));
 app.use(helmet());
 
-// testing
-app.get('/', (req, res)=>{
-    res.send('fck')
-})
 
 // middlewares
 app.use('/api/auth', authRoute)
 app.use('/api/users', usersRoute)
 app.use('/api/hotels', hotelsRoute)
 app.use('/api/rooms', roomsRoute)
-
 
 // mongodb connection
 const main = async () => {

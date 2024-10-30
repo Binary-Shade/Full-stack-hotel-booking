@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteUser, getAllUser, getUser, updateUser } from "../controllers/user.js";
+import { deleteUser, getAllUser, getUser, updateUser, upload } from "../controllers/user.js";
 import { verifyAdmin, verifyToken, verifyUser } from "../utils/verifyToken.js";
 
 const router = Router()
@@ -18,13 +18,16 @@ router.get('/checkAdmin/:id', verifyAdmin, (req, res)=>{
 router.put('/:id',verifyUser, updateUser)
 
 // DELETE
-router.delete('/:id',verifyUser, deleteUser)
+router.delete('/find/:id', deleteUser)
 
 // GET 
 router.get('/:id',verifyUser, getUser)
 
 // GET ALL
-router.get('/',verifyUser, getAllUser)
+router.get('/', getAllUser)
 
+//UPLOAD
+
+router.post('/upload', upload)
 
 export default router

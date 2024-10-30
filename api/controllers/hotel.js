@@ -1,4 +1,5 @@
 import Hotel from '../models/Hotel.js'
+import Room from '../models/Room.js'
 
 // create
 export const createHotel = async (req, res, next) =>{
@@ -29,6 +30,7 @@ export const updateHotel = async (req, res, next) =>{
 // delete
 export const deleteHotel = async (req, res, next) =>{
     const id = req.params.id
+    console.log(id);
     try {
         await Hotel.findByIdAndDelete(id)
         res.status(200).json({
@@ -51,13 +53,27 @@ export const getHotel = async (req, res, next) =>{
 // get all
 export const getAllHotel = async (req, res, next) => {
     try {
-        const { limit, ...others } = req.query; 
-        const hotels = await Hotel.find(...others).limit(Number(limit) || 10); 
+        // const { limit, min = 1, max = 999, ...query } = req.query;
+        // const lim = parseInt(limit) || 50; // Default limit to 10 if not provided
+        // const hotels = await Hotel.find({ 
+        //     ...query, 
+        //     cheapestPrice: { $gt: min, $lt: max } 
+        // }).limit(lim);
+
+        // console.log(`Limit: ${lim}`);
+        // console.log('Hotels:', hotels.length);
+        const {limit, min, max, ...query} = req.query;
+        const lim = parseInt(limit) || 40;
+        const hotels = await Hotel.find({
+            ...query
+        }).limit(lim)
         res.status(200).json(hotels);
     } catch (err) {
-        next(err); 
+        console.error('Error fetching hotels:', err);
+        next(err);
     }
-}
+};
+
 
 // Count by city
 export const countByCity = async (req, res, next) =>{
@@ -105,5 +121,18 @@ export const countByType = async (req, res, next) => {
     }
 };
 
+export const getHotelRooms = async (req, res, next) =>{
+    try {
+        const id = req.params.id
+        const hotel = await Hotel.findById(id)
+        console.log(id);
+        const list = await Promise.all(hotel.rooms.map(room=>{
+            return Room.findById(room)
+        }))
+        res.status(200).json(list)
+    } catch (err) {
+        next(err)
+    }
+}
 
 
