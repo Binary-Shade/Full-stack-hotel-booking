@@ -12,6 +12,7 @@
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@react-oauth/google": "^0.13.5",
     "axios": "^1.7.5",
     "date-fns": "^3.6.0",
     "react": "^18.3.1",

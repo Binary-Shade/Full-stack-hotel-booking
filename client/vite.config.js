@@ -1,15 +1,10 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8001/api/', // Replace with your backend server URL
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
+  // SECURITY: remove console.* and debugger from production builds
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
-});
+}))

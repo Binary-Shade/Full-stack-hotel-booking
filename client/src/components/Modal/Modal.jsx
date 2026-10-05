@@ -51,18 +51,23 @@ const Modal = ({setModalOpen, id}) => {
     return !isFound;
   }
 
-  const handleSubmit =async (e) =>{
+  const handleSubmit = async (e) =>{
     try {
-      await Promise.all(selectedRooms.map(roomId => {
-        const response = axios.put(`/api/rooms/available/${roomId}`, {dates: allDatesRange})
-        console.log(response.data);
-      }))
+      // return the promises so Promise.all actually waits for them and sees errors
+      await Promise.all(selectedRooms.map(roomId =>
+        axios.put(`/api/rooms/available/${roomId}`, {dates: allDatesRange})
+      ))
       setModalOpen(false)
       navigate('/')
     } catch (err) {
-      console.log(err);
+      const status = err.response?.status
+      if (status === 401 || status === 403) {
+        toast.error('Please log in to reserve a room')
+        navigate('/login')
+      } else {
+        toast.error(err.response?.data?.message || 'Could not reserve room')
+      }
     }
-
   }
 
   return (

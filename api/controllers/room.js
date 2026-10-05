@@ -1,5 +1,7 @@
 import Room from "../models/Room.js";
 import Hotel from "../models/Hotel.js";
+import mongoose from "mongoose";
+import { createError } from "../utils/error.js";
 
 //create
 export const createRoom = async (req, res, next) => {
@@ -36,19 +38,37 @@ export const updateRoom = async (req, res, next) =>{
         next(err)
     }
 }
-//update dates
+// update dates (reserve room numbers)
+// SECURITY: dates are validated, and the update only happens if none of the
+// requested nights are already booked (atomic check-and-set), so the same
+// night can no longer be sold twice.
+const MAX_NIGHTS = 30
 export const updateAvailability = async (req, res, next) =>{
     const id = req.params.id
-    console.log(id);
-    console.log(req.body.dates);
+    const dates = req.body.dates
+
+    if (!mongoose.isValidObjectId(id)) {
+        return next(createError(400, 'invalid room id'))
+    }
+    if (!Array.isArray(dates) || dates.length === 0 || dates.length > MAX_NIGHTS) {
+        return next(createError(400, `dates must be an array of 1-${MAX_NIGHTS} days`))
+    }
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+    const parsed = dates.map(d => new Date(d))
+    if (parsed.some(d => isNaN(d.getTime()) || d < startOfToday)) {
+        return next(createError(400, 'dates must be valid and not in the past'))
+    }
+
     try {
-        await Room.updateOne({
-            'roomNumbers._id': id
+        const result = await Room.updateOne({
+            roomNumbers: { $elemMatch: { _id: id, unavailableDates: { $nin: parsed } } }
         }, {
-            $push: {
-                'roomNumbers.$.unavailableDates': req.body.dates
-            }
+            $push: { 'roomNumbers.$.unavailableDates': { $each: parsed } }
         })
+        if (result.matchedCount === 0) {
+            return next(createError(409, 'room not found or already booked for those dates'))
+        }
         res.status(200).json('dates updated successfully')
     }catch(err){
         next(err)

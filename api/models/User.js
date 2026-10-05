@@ -19,6 +19,7 @@ const UserSchema = mongoose.Schema({
     password:{
         type: String,
         required: true,
+        select: false,   // never send the password hash back
     },
     country:{
         type: String,

@@ -5,9 +5,6 @@ import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUpload
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
-import { imageDB } from "../new/config.js";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { v4 } from "uuid";
 import { ImageList, ImageListItem } from "@mui/material";
 
 const NewHotel = ({ inputs, title }) => {
@@ -25,14 +22,18 @@ const NewHotel = ({ inputs, title }) => {
     const urls = [];
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i]; // Use files[i] to get each file
-      const imgRef = ref(imageDB, `uploads/${v4()}`);
+      const file = files[i];
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
       try {
-        await uploadBytes(imgRef, file);
+        const res = await axios.post(
+          `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+          formData
+        );
         console.log(`Image ${i + 1} uploaded`);
-        const downloadURL = await getDownloadURL(imgRef);
-        urls.push(downloadURL);
+        urls.push(res.data.secure_url);
       } catch (error) {
         console.error(error);
       }

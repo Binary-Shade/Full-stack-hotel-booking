@@ -16,12 +16,25 @@ import NewRoom from './pages/newRoom/NewRoom.jsx'
 function App() {
   const { darkMode } = useContext(DarkModeContext);
 
+  // SECURITY: localStorage can be edited by anyone, so it is only a hint.
+  // Every protected page asks the server to confirm this session is an admin.
   const ProtectedRoutes = ({ children }) => {
-    const { user } = useContext(AuthContext);
-    if (!user) {
-      return <Navigate to="/login" />; // Redirect to login if user is not authenticated
-    }
-    return children; // Allow access if user is authenticated
+    const { user, dispatch } = useContext(AuthContext);
+    const [status, setStatus] = useState(user ? "checking" : "denied");
+
+    useEffect(() => {
+      if (!user) return;
+      axios.get("/api/auth/admin/verify")
+        .then(() => setStatus("ok"))
+        .catch(() => {
+          dispatch({ type: "LOGOUT" });
+          setStatus("denied");
+        });
+    }, [user, dispatch]);
+
+    if (status === "denied") return <Navigate to="/login" />;
+    if (status === "checking") return null;
+    return children;
   };
 
   return (

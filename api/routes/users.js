@@ -18,13 +18,13 @@ router.get('/checkAdmin/:id', verifyAdmin, (req, res)=>{
 router.put('/:id',verifyUser, updateUser)
 
 // DELETE
-router.delete('/find/:id', deleteUser)
+router.delete('/find/:id', verifyAdmin, deleteUser)
 
-// GET 
+// GET
 router.get('/:id',verifyUser, getUser)
 
 // GET ALL
-router.get('/', getAllUser)
+router.get('/', verifyAdmin, getAllUser)
 
 //UPLOAD
 

@@ -9,13 +9,13 @@ router.get('/countByCity', countByCity);
 router.get('/countByType', countByType);
 
 // CREATE
-router.post('/', createHotel);
+router.post('/', verifyAdmin, createHotel);
 
 // UPDATE
-router.put('/:id', updateHotel);
+router.put('/:id', verifyAdmin, updateHotel);
 
 // DELETE
-router.delete('/find/:id', deleteHotel);
+router.delete('/find/:id', verifyAdmin, deleteHotel);
 
 // GET  
 router.get('/:id', getHotel);

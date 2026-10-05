@@ -25,7 +25,15 @@ app.use(json());
 app.use(cors({
     origin: 'http://localhost:5173',
 }));
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
+    },
+  },
+}));
 
 
 // middlewares
@@ -47,14 +55,27 @@ const main = async () => {
 };
 
 // error handler
+// SECURITY: never send err.stack or raw internal error messages to the client.
+// Expected errors (status < 500) keep their message; unexpected ones get a
+// generic message and are logged on the server only.
 app.use((err, req, res, next)=>{
-    const stat = err.status || 500 
-    const msg = err.message || 'something went wrong !'
+    let stat = err.status || err.statusCode || 500
+    let msg = err.message
+    if (err.name === 'CastError') {   // malformed ObjectId in the URL
+        stat = 400
+        msg = 'invalid id'
+    }
+    if (err.type === 'entity.parse.failed') {   // invalid JSON body
+        msg = 'invalid JSON'
+    }
+    if (stat >= 500) {
+        console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`, err)
+        msg = 'something went wrong !'
+    }
     res.status(stat).json({
         success: false,
         status : stat,
         message: msg,
-        stack: err.stack
     })
 })
 

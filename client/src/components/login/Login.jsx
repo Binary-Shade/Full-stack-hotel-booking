@@ -3,6 +3,7 @@ import './login.css'
 import { AuthContext } from '../../context/AuthContext'
 import {useNavigate} from 'react-router-dom'
 import axios from 'axios'
+import { GoogleLogin } from '@react-oauth/google'
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
@@ -16,22 +17,37 @@ const Login = () => {
         setCredentials((prev)=>(
             {...prev ,[e.target.id]: e.target.value}
         ));
-        console.log(credentials); // Debugging line to track credentials state
     }
     
     const handleSubmit = async (e) =>{
         e.preventDefault();
-        console.log("Submitting credentials:", credentials); // Check the credentials being submitted
         dispatch({type: "LOGIN_START"});
         try {
             const response = await axios.post('/api/auth/login', credentials);
-            // console.log("Response data:", response.data); // Log the response from the server
             dispatch({type: "LOGIN_SUCCESS", payload: response.data.details});
             navigate('/')
         } catch (error) {
-            console.error("Login error:", error); // Log the error
+            console.error("Login error:", error);
             dispatch({type: "LOGIN_FAILURE", payload: error.response?.data || "Something went wrong"});
         }
+    }
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        dispatch({type: "LOGIN_START"});
+        try {
+            const response = await axios.post('/api/auth/google', {
+                credential: credentialResponse.credential
+            });
+            dispatch({type: "LOGIN_SUCCESS", payload: response.data.details});
+            navigate('/')
+        } catch (error) {
+            console.error("Google login error:", error);
+            dispatch({type: "LOGIN_FAILURE", payload: error.response?.data || "Google login failed"});
+        }
+    }
+
+    const handleGoogleError = () => {
+        dispatch({type: "LOGIN_FAILURE", payload: {message: "Google login was cancelled or failed"}});
     }
     
   return (
@@ -52,6 +68,16 @@ const Login = () => {
                 onChange={handleChange}
             />
             <button disabled={loading} onClick={handleSubmit} className='lButton'>Log in</button>
+
+            <div style={{ margin: '16px 0', textAlign: 'center' }}>— or —</div>
+
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                />
+            </div>
+
             {
     error && <span className='error'>{error.message || "An error occurred during login"}</span>
 }

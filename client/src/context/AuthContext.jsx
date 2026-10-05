@@ -1,8 +1,16 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
 // Initial state
+// SECURITY: only non-sensitive display fields are kept, in sessionStorage
+// (cleared when the browser closes) instead of the full user in localStorage.
+const toSafeUser = (u) => u ? { _id: u._id, username: u.username, img: u.img } : null;
+
+const loadUser = () => {
+    try { return JSON.parse(sessionStorage.getItem("user")) } catch { return null }
+};
+
 const INIT = {
-    user: JSON.parse(localStorage.getItem("user")) || null,
+    user: loadUser(),
     loading: false,
     error: null
 };
@@ -48,7 +56,12 @@ export const AuthContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(AuthReducer, INIT);
     
     useEffect(()=>{
-        localStorage.setItem("user", JSON.stringify(state.user))
+        if (state.user) {
+            sessionStorage.setItem("user", JSON.stringify(state.user))
+        } else {
+            sessionStorage.removeItem("user")
+        }
+        localStorage.removeItem("user")   // clean up data saved by the old version
     },[state.user])
     return (
         <AuthContext.Provider
