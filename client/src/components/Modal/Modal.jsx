@@ -1,130 +1,106 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import useFetch from '../../hooks/useFetch';
-import './modal.css'
-import { IoClose } from "react-icons/io5";
+import './modal.css';
 import { SearchContext } from '../../context/searchContext';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Toaster, { toast } from 'react-hot-toast'
+import { useLocation, useNavigate } from 'react-router-dom';
+import { addDays, differenceInCalendarDays, format, startOfDay } from 'date-fns';
+import PropTypes from 'prop-types';
 
-const Modal = ({setModalOpen, id}) => {
-  const {data, loading, error} = useFetch(`/api/hotels/room/${id}`)
-  const [selectRoom, setSelectRoom] = useState('')
-  const [selectedRooms, setSelectedRooms] = useState([])
-  const {date} = useContext(SearchContext)
-  const navigate = useNavigate()
-  // console.log(data);
-  const selectedRoom = data.find(room => room.title == selectRoom)
-  console.log(selectedRoom);
-  const handleChange = (e) =>{
-    setSelectRoom(e.target.value)
-  }
+const Modal = ({ setModalOpen, id, onReserved }) => {
+  const { data, loading, error, reFetch } = useFetch('/api/hotels/room/' + id);
+  const [roomId, setRoomId] = useState('');
+  const [selectedRooms, setSelectedRooms] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const { date, dispatch } = useContext(SearchContext);
+  const [stay, setStay] = useState(date);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dialog = useRef(null);
+  const rooms = Array.isArray(data) ? data.filter(Boolean) : [];
+  const selectedRoom = rooms.find(room => room._id === roomId);
+  const nights = differenceInCalendarDays(stay[0].endDate, stay[0].startDate);
+  const validDates = stay[0].startDate >= startOfDay(new Date()) && nights > 0 && nights <= 30;
+  const stayDates = validDates
+    ? Array.from({ length: nights }, (_, index) => startOfDay(addDays(stay[0].startDate, index)).getTime()) : [];
+  const available = number => !number.unavailableDates.some(value => stayDates.includes(startOfDay(new Date(value)).getTime()));
 
-  const handleCheck = (e) =>{
-    const checked = e.target.checked
-    const value = e.target.value
-    setSelectedRooms(
-      checked ? [...selectedRooms, value] : selectedRooms.filter(item => item !== value)
-    )
-  }
+  useEffect(() => {
+    dialog.current.showModal();
+  }, []);
 
-  const dateInRange = (startDate, endDate) => {
-    const start = new Date(startDate);  // Starting date
-    const end = new Date(endDate);      // Ending date
-  
-    let dateNow = new Date(start);  // Initialize dateNow as a Date object
-    const datesList = [];
-  
-    // While dateNow is before the end date
-    while (dateNow <= end) {
-      datesList.push(new Date(dateNow).getTime());  // Add current date to list
-      dateNow.setDate(dateNow.getDate() + 1);  // Increment by one day
+  const changeDate = (key, value) => {
+    if (!value) return;
+    const nextDate = [{ ...stay[0], [key]: new Date(value + 'T00:00:00') }];
+    setStay(nextDate);
+    setSelectedRooms([]);
+    setMessage('');
+    if (nextDate[0].endDate > nextDate[0].startDate) {
+      dispatch({ type: 'NEW_SEARCH', payload: { date: nextDate } });
     }
-  
-    return datesList;  // Return the list of dates
-  }
-  
-  const allDatesRange = (dateInRange(date[0].startDate, date[0].endDate))
+  };
 
-  const isAvailable = (roomNumber) => {
-    const isFound = roomNumber.unavailableDates.some(date => allDatesRange.includes(new Date(date).getTime()))
-    return !isFound;
-  }
-
-  const handleSubmit = async (e) =>{
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!validDates || !selectedRooms.length || submitting) return;
+    setSubmitting(true);
+    setMessage('');
+    let completed = 0;
     try {
-      // return the promises so Promise.all actually waits for them and sees errors
-      await Promise.all(selectedRooms.map(roomId =>
-        axios.put(`/api/rooms/available/${roomId}`, {dates: allDatesRange})
-      ))
-      setModalOpen(false)
-      navigate('/')
+      for (const numberId of selectedRooms) {
+        await axios.put('/api/rooms/available/' + numberId, { dates: stayDates });
+        completed += 1;
+        setSelectedRooms(previous => previous.filter(value => value !== numberId));
+      }
+      onReserved();
+      setModalOpen(false);
     } catch (err) {
-      const status = err.response?.status
-      if (status === 401 || status === 403) {
-        toast.error('Please log in to reserve a room')
-        navigate('/login')
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        navigate('/login', { state: { returnTo: location.pathname } });
       } else {
-        toast.error(err.response?.data?.message || 'Could not reserve room')
+        setMessage((completed ? completed + ' room(s) reserved. ' : '') +
+          (err.response?.data?.message || 'Could not reserve the remaining rooms. Please try again.'));
+        await reFetch();
+        setSelectedRooms([]);
       }
+    } finally {
+      setSubmitting(false);
     }
-  }
+  };
 
-  return (
-    <>
-      {loading ? "loading" : 
-        <div className='Modal'>
-        <div className="ModalContainer">
-        <div className="closer">
-        <IoClose 
-            onClick={()=>setModalOpen(false)}
-        />
-        </div>
-            <p className='Rtext'>Reserve Hotel !</p>
-          <div className="roomSelect">
-          <span>select room :</span>
-        <select name="select" id="selecter"  onChange={handleChange}  className='select'>
-          <option value="">--select room--</option>
-          {
-            data.map(room=>(
-              <option key={room._id} value={room.title}>{room.title}</option>
-            ))
-          }
+  return <dialog className="Modal" ref={dialog} aria-labelledby="reservationTitle" onCancel={event => {
+    event.preventDefault();
+    if (!submitting) setModalOpen(false);
+  }}>
+    <form className="ModalContainer" onSubmit={submit}>
+      <button className="closer" type="button" aria-label="Close reservation" disabled={submitting} onClick={() => setModalOpen(false)}>×</button>
+      <h2 id="reservationTitle">Reserve a room</h2>
+      <label>Check-in<input type="date" value={format(stay[0].startDate, 'yyyy-MM-dd')} min={format(new Date(), 'yyyy-MM-dd')} disabled={submitting} onChange={event => changeDate('startDate', event.target.value)} /></label>
+      <label>Check-out<input type="date" value={format(stay[0].endDate, 'yyyy-MM-dd')} min={format(addDays(stay[0].startDate, 1), 'yyyy-MM-dd')} disabled={submitting} onChange={event => changeDate('endDate', event.target.value)} /></label>
+      {!validDates && <div role="alert">Choose a stay of 1 to 30 nights.</div>}
+      {loading ? <div>Loading rooms...</div> : error || !Array.isArray(data) ? <div role="alert">Unable to load rooms. <button type="button" onClick={reFetch}>Try again</button></div> : rooms.length === 0 ? <div>No rooms are available at this property.</div> : <>
+        <label htmlFor="reservationRoom">Select room</label><select id="reservationRoom" value={roomId} disabled={submitting} onChange={event => { setRoomId(event.target.value); setSelectedRooms([]); }}>
+          <option value="">Choose a room</option>
+          {rooms.map(room => <option key={room._id} value={room._id}>{room.title}</option>)}
         </select>
-          </div>
-        {
-          selectRoom && 
-          <>
-            <div className="roomContents">
-              <div className="roomTitle">room name: {selectedRoom.title}</div>
-              <div className="roomPrice">Price:$ {selectedRoom.price}</div>
-              <div className="maxPeople">Max-People : {selectedRoom.maxpeople}</div>
-              <div className="description">Description : {selectedRoom.desc}</div>
-              <div className="roomNumber">
-                <span>select room number :</span>
-                {
-                  selectedRoom.roomNumbers.map(number =>(
-                    <div 
-                    className="roomSelectorContainer">
-                      <div className='roomSelector'>
-                      <span>{number.number}</span>
-                      <input type="checkbox" disabled={!isAvailable(number)} key={number._id} value={number._id} onChange={handleCheck}/>
-                    </div>
-                    </div>
-                  ))
-                }
-              </div>
-            </div>   
-          </>
-        }
-        <div className="btnDiv">
-        <button className='ModalBtn' onClick={handleSubmit}>Reserve Now !</button>
-        </div>
-        </div>
-    </div>
-      }
-    </>
-  )
-}
+        {selectedRoom && <div className="roomContents">
+          <div>Price: $ {selectedRoom.price} per night</div>
+          <div>Maximum guests: {selectedRoom.maxpeople}</div>
+          <div>{selectedRoom.desc}</div>
+          <fieldset><legend>Select room numbers</legend>
+            {selectedRoom.roomNumbers.map(number => <label key={number._id} className="roomChoice">
+              <input type="checkbox" checked={selectedRooms.includes(number._id)} disabled={submitting || !validDates || !available(number)} onChange={event => setSelectedRooms(previous => event.target.checked ? [...previous, number._id] : previous.filter(value => value !== number._id))} />
+              Room {number.number}{!available(number) && ' (unavailable)'}
+            </label>)}
+          </fieldset>
+        </div>}
+      </>}
+      {message && <div role="alert">{message}</div>}
+      <button type="submit" className="ModalBtn" disabled={submitting || loading || Boolean(error) || !validDates || !selectedRooms.length}>{submitting ? 'Reserving...' : 'Reserve now'}</button>
+    </form>
+  </dialog>;
+};
 
-export default Modal
+Modal.propTypes = { setModalOpen: PropTypes.func.isRequired, id: PropTypes.string.isRequired, onReserved: PropTypes.func.isRequired };
+export default Modal;

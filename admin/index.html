@@ -4,9 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <!-- SE4030 SECURITY FIX - Z5
+         Vulnerability: Sub Resource Integrity Attribute Missing
+         Detection: OWASP ZAP
+         ORIGINAL VULNERABLE IMPLEMENTATION (DISABLED):
+         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+         Fix: self-host licensed Poppins assets and pin the local CSS bytes.
+         See /fonts/poppins/OFL.txt and provenance.json.
+    -->
+    <link rel="stylesheet" href="/fonts/poppins/poppins.css"
+          integrity="sha384-3InUzywU2Slc3FUWjIeFBUKChjlSY5PZoez86/Am+kMyWQk493KLBFJBEVP5aTjH" crossorigin="anonymous" />
     <title>super admin</title>
   </head>
   <body>

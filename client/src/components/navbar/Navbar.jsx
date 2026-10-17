@@ -4,8 +4,24 @@ import {Link} from 'react-router-dom'
 import { Logo } from "../../assets";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import axios from "axios";
+import { useState } from "react";
 import { FaUser } from "react-icons/fa6";const Navbar = () => {
-  const {user} = useContext(AuthContext);
+  const {user, dispatch} = useContext(AuthContext);
+  const [error, setError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
+  const logout = async () => {
+    setLoggingOut(true);
+    setError('');
+    try {
+      await axios.post('/api/auth/logout');
+      dispatch({ type: 'LOGOUT' });
+    } catch {
+      setError('Unable to log out. Please try again.');
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <div className="navbar">
@@ -21,11 +37,13 @@ import { FaUser } from "react-icons/fa6";const Navbar = () => {
             <FaUser />
         <span>{user.username}</span>
       </div>
+          <button className="navButton" onClick={logout} disabled={loggingOut}>{loggingOut ? 'Logging out...' : 'Log out'}</button>
+          {error && <span role="alert">{error}</span>}
         </div>
         : <div className="navContainer">
         <div className="navItems">
-          <span>Register</span>
-          <button className="navButton">Login <FaLongArrowAltRight /> </button>
+          <Link to="/register" className="navRegister">Register</Link>
+          <Link to="/login" className="navButton">Login <FaLongArrowAltRight /> </Link>
         </div>
       </div>
       }

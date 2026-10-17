@@ -128,3 +128,18 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# API
+.api/package-lock.json
+.api/package.json
+.api/.env
+
+# Admin
+.admin/package-lock.json
+.admin/package.json
+.admin/.env
+
+# Client
+.client/package-lock.json
+.client/package.json
+.client/.env

@@ -1,4 +1,5 @@
 import useFetch from "../../hooks/useFetch";
+import { Link } from "react-router-dom";
 import "./property.css";
 
 const PropertyList = () => {
@@ -9,11 +10,14 @@ const PropertyList = () => {
     "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/card-image-chalet_300/8ee014fcc493cb3334e25893a1dee8c6d36ed0ba.jpg"
   ]
   const {data, loading, error} = useFetch('/api/hotels/countByType')
-  console.log(data);
+  if (loading) return <div className="pList">Loading property types...</div>;
+  if (error || !Array.isArray(data)) {
+    return <div className="pList" role="alert">Unable to load property types. Please try again later.</div>;
+  }
   return (
     <div className="pList">
       {data && data.map((item, i) => (
-        <div className="pListItem" key={i}>
+        <Link to={`/hotels?${new URLSearchParams({ type: item.type })}`} className="pListItem" key={item.type}>
           <img
             src={images[i]}
             alt={item.type}
@@ -23,7 +27,7 @@ const PropertyList = () => {
             <h1>{item.type}</h1>
             <h2>{`${item.count} ${item.type}`}</h2>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

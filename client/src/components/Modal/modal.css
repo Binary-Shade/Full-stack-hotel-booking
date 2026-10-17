@@ -2,13 +2,20 @@
     height: max-content;
     position: fixed;
     place-items: center;
-    top: 20%;
-    left: 40%;
+    margin: auto;
+    max-width: min(95vw, 520px);
+    max-height: 90vh;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
     z-index: 4;
     color: #fff;
 }
 
 .closer {
+    border: 0;
+    background: none;
+    color: inherit;
     position: absolute;
     font-size: 20px;
     top: 10px;
@@ -32,7 +39,7 @@
 
 }
 
-p{
+.Modal p{
     text-align: center;
     font-weight: 600;
     margin-bottom: 40px;
@@ -49,7 +56,7 @@ p{
     text-align: center;
 }
 
-select {
+.Modal select {
     padding: 5px 11px;
     margin:0px 10px;
 }
@@ -81,7 +88,12 @@ select {
     flex-direction: row;
 }
 
-input[type='checkbox']{
+.Modal input[type='checkbox']{
     width: 20px;
     cursor: pointer;
 }
+
+.Modal::backdrop { background: rgba(0, 0, 0, .5); }
+.Modal label { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+.Modal .roomChoice { justify-content: flex-start; padding: 8px; }
+.Modal fieldset { padding: 8px; }

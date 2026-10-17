@@ -1,6 +1,6 @@
 .footer{
     width: 100%;
-    width: 1024px;
+    max-width: 1024px;
     font-size: 12px;
   }
   
@@ -25,3 +25,7 @@
   .fText{
     text-align: center;
   }
+
+  .fListItem button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+  .footerNotice { padding: 12px; background: #edf5ff; margin-bottom: 20px; }
+  .footerNotice button { float: right; background: none; border: 0; cursor: pointer; }

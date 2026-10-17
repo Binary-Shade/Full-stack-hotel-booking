@@ -1,0 +1,7 @@
+# SE4030 Z5: keep SRI/provenance bytes stable across Windows and Unix checkouts.
+/.gitattributes text eol=lf
+/client/public/fonts/poppins/* text eol=lf
+/admin/public/fonts/poppins/* text eol=lf
+/client/public/fonts/poppins/*.woff2 binary
+/admin/public/fonts/poppins/*.woff2 binary
+/evidence/member4/ZAP-Fixes/Z5-Subresource-Integrity/09-original-fonts-response.css text eol=lf

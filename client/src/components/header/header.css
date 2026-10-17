@@ -1,4 +1,5 @@
 .header {
+    z-index: 2;
     background: url('../../assets/bg2.jpg');
     /* color: white; */
     display: flex;
@@ -8,7 +9,7 @@
     background-repeat: no-repeat;
     background-size: cover;
   }
-  
+
   .headerTitle {
     color: white;
   }
@@ -18,35 +19,40 @@
     max-width: 1024px;
     margin: 20px 0px 100px 0px;
   }
-  
+
   .headerContainer.listMode {
     margin: 20px 0px 0px 0px;
   }
-  
+
   .headerList {
     display: flex;
     gap: 40px;
     margin-bottom: 50px;
   }
-  
+
   .headerListItem {
     display: flex;
     align-items: center;
     gap: 10px;
+    background: none;
+    border: 0;
+    color: #101820;
+    font: inherit;
+    cursor: pointer;
   }
-  
+
   .headerListItem.active {
     border: 1px solid white;
     padding: 10px;
     border-radius: 20px;
   }
-  
+
   .headerDesc {
     font-weight: 400;
     margin: 20px 0px;
     color: #c6cacc;
   }
-  
+
   .headerBtn {
     background-color: #0071c2;
     color: white;
@@ -60,8 +66,9 @@
     place-items: center;
     justify-content: space-around;
   }
-  
+
   .headerSearch {
+    z-index: 3;
     height: 50px;
     background-color: white;
     border: 3px solid #febb02;
@@ -75,33 +82,36 @@
     width: 100%;
     max-width: 1024px;
   }
-  
+
   .headerIcon {
     color: lightgray;
   }
-  
+
   .headerSearchItem {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  
+
   .headerSearchInput {
     border: none;
     outline: none;
   }
-  
+
   .headerSearchText {
-    color: lightgray;
+    color: #60666a;
     cursor: pointer;
+    background: none;
+    border: none;
+    font: inherit;
   }
-  
+
   .date {
     position: absolute;
     top: 50px;
     z-index: 2;
   }
-  
+
   .options {
     z-index: 2;
     position: absolute;
@@ -112,14 +122,14 @@
     -webkit-box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 0.4);
     box-shadow: 0px 0px 10px -5px rgba(0, 0, 0, 0.4);
   }
-  
+
   .optionItem {
     width: 200px;
     display: flex;
     justify-content: space-between;
     margin: 10px;
   }
-  
+
   .optionCounter {
     display: flex;
     align-items: center;
@@ -127,7 +137,7 @@
     font-size: 12px;
     color: black;
   }
-  
+
   .optionCounterButton {
     width: 30px;
     height: 30px;
@@ -136,8 +146,13 @@
     cursor: pointer;
     background-color: white;
   }
-  
+
   .optionCounterButton:disabled {
     cursor: not-allowed;
   }
-  
+
+  .serviceNotice { background: white; color: #003580; padding: 12px; margin: -30px 0 20px; border-radius: 4px; }
+  .serviceNotice button { float: right; border: 0; background: none; font-size: 20px; cursor: pointer; }
+  .searchError { background: white; padding: 8px; color: #a51d1d; margin-top: 16px; }
+  .headerList { flex-wrap: wrap; }
+

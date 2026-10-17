@@ -63,7 +63,7 @@
     color: #4CAF50;
     text-decoration: none;
   }
-  
+
   .container {
     position: relative;
     z-index: 1;
@@ -75,4 +75,10 @@
     display: block;
     clear: both;
   }
-  
+
+  .register-page { height: auto; min-height: 100vh; padding: 32px 16px; }
+  .register-page .form { width: 100%; max-width: 460px; margin: 0; padding: 28px; }
+  .form label { text-align: left; }
+  .form button:disabled { opacity: .6; cursor: wait; }
+  .form p { margin: 0; }
+

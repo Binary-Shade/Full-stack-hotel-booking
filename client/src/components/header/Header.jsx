@@ -2,22 +2,26 @@
   import { FaPerson } from "react-icons/fa6";
   import "./header.css";
   import { DateRange } from "react-date-range";
-  import { useContext, useState } from "react";
+  import { useContext, useEffect, useRef, useState } from "react";
   import "react-date-range/dist/styles.css"; // main css file
   import "react-date-range/dist/theme/default.css"; // theme css file
   import { format } from "date-fns";
-  import { useNavigate } from "react-router-dom";
+  import { Link, useNavigate } from "react-router-dom";
   import { FaLongArrowAltRight } from "react-icons/fa";
 import { SearchContext } from "../../context/searchContext";
 import { AuthContext } from "../../context/AuthContext";
+import PropTypes from 'prop-types';
 
   const Header = ({ type }) => {
     const [destination, setDestination] = useState("");
+    const [service, setService] = useState('');
+    const [searchError, setSearchError] = useState('');
+    const searchRef = useRef(null);
     const [openDate, setOpenDate] = useState(false);
     const [date, setDate] = useState([
       {
         startDate: new Date(),
-        endDate: new Date(),
+        endDate: new Date(new Date().setDate(new Date().getDate() + 1)),
         key: "selection",
       },
     ]);
@@ -27,25 +31,47 @@ import { AuthContext } from "../../context/AuthContext";
       children: 0,
       room: 1,
     });
-  
+
     const navigate = useNavigate();
-  
+
     const {dispatch} = useContext(SearchContext)
+
+    useEffect(() => {
+      const close = (event) => {
+        if (event.key === 'Escape' || (event.type === 'pointerdown' && !searchRef.current?.contains(event.target))) {
+          setOpenDate(false);
+          setOpenOptions(false);
+        }
+      };
+      document.addEventListener('pointerdown', close);
+      document.addEventListener('keydown', close);
+      return () => {
+        document.removeEventListener('pointerdown', close);
+        document.removeEventListener('keydown', close);
+      };
+    }, []);
 
     const handleOption = (name, operation) => {
       setOptions((prev) => {
         return {
           ...prev,
-          [name]: operation === "i" ? options[name] + 1 : options[name] - 1,
+          [name]: Math.max(name === 'children' ? 0 : 1, prev[name] + (operation === 'i' ? 1 : -1)),
         };
       });
     };
-  
-    const handleSearch = () => {
-      dispatch({type: "NEW_SEARCH", payload: {destination, date, options}})
-      navigate("/hotels", { state: { destination, date, options } });
+
+    const handleSearch = (event) => {
+      event.preventDefault();
+      if (date[0].endDate <= date[0].startDate) {
+        setSearchError('Choose a check-out date after check-in.');
+        return;
+      }
+      setSearchError('');
+      const city = destination.trim();
+      dispatch({type: "NEW_SEARCH", payload: {destination: city, date, options}})
+      navigate(`/hotels${city ? `?${new URLSearchParams({ city })}` : ''}`, { state: { destination: city, date, options } });
     };
-  
+
     const {user} = useContext(AuthContext);
 
 
@@ -56,59 +82,48 @@ import { AuthContext } from "../../context/AuthContext";
             type === "list" ? "headerContainer listMode" : "headerContainer"
           }
         >
-          <div className="headerList">
-            <div className="headerListItem active">
+          <nav className="headerList" aria-label="Travel services">
+            <Link to="/hotels" className="headerListItem active">
               <FaBed />
               <span>Stays</span>
-            </div>
-            <div className="headerListItem">
-              <FaPlane />
-              <span>Flights</span>
-            </div>
-            <div className="headerListItem">
-              <FaCar />
-              <span>Car rentals</span>
-            </div>
-            <div className="headerListItem">
-              <FaBed />
-              <span>Attractions</span>
-            </div>
-            <div className="headerListItem">
-              <FaTaxi />
-              <span>Airport taxis</span>
-            </div>
-          </div>
+            </Link>
+            {[[FaPlane, 'Flights'], [FaCar, 'Car rentals'], [FaBed, 'Attractions'], [FaTaxi, 'Airport taxis']].map(([Icon, label]) => (
+              <button type="button" className="headerListItem" key={label} onClick={() => setService(label)}><Icon /><span>{label}</span></button>
+            ))}
+          </nav>
+          {service && <div className="serviceNotice" role="status">{service}: Coming soon. You can book stays today.<button type="button" onClick={() => setService('')} aria-label="Dismiss notice">×</button></div>}
           {type !== "list" && (
             <>
               <h1 className="headerTitle">
-                <span style={{color:'white'}}>A lifetime of discounts? </span>It's right choice !
+                <span style={{color:'white'}}>A lifetime of discounts? </span>It&apos;s right choice !
               </h1>
               <p className="headerDesc">
                 Get rewarded for your travels – unlock instant savings of 10% or
                 more with a free BookNrest account
               </p>
               {
-                !user && <button className="headerBtn">Sign in / Register</button>
+                !user && <Link to="/login" className="headerBtn">Sign in / Register</Link>
               }
-              <div className="headerSearch">
+              <form className="headerSearch" ref={searchRef} onSubmit={handleSearch}>
                 <div className="headerSearchItem">
                   <FaBed />
                   <input
                     type="text"
                     placeholder="Where are you going?"
+                    aria-label="Destination"
                     className="headerSearchInput"
                     onChange={(e) => setDestination(e.target.value)}
                   />
                 </div>
                 <div className="headerSearchItem">
                   <FaCalendarDay />
-                  <span
-                    onClick={() => setOpenDate(!openDate)}
+                  <button type="button" aria-label="Choose dates" aria-expanded={openDate}
+                    onClick={() => { setOpenDate(!openDate); setOpenOptions(false); }}
                     className="headerSearchText"
                   >{`${format(date[0].startDate, "MM/dd/yyyy")} to ${format(
                     date[0].endDate,
                     "MM/dd/yyyy"
-                  )}`}</span>
+                  )}`}</button>
                   {openDate && (
                     <DateRange
                       editableDateInputs={true}
@@ -122,16 +137,17 @@ import { AuthContext } from "../../context/AuthContext";
                 </div>
                 <div className="headerSearchItem">
                   <FaPerson />
-                  <span
-                    onClick={() => setOpenOptions(!openOptions)}
+                  <button type="button" aria-label="Choose guests and rooms" aria-expanded={openOptions}
+                    onClick={() => { setOpenOptions(!openOptions); setOpenDate(false); }}
                     className="headerSearchText"
-                  >{`${options.adult} adult · ${options.children} children · ${options.room} room`}</span>
+                  >{`${options.adult} adult · ${options.children} children · ${options.room} room`}</button>
                   {openOptions && (
                     <div className="options">
                       <div className="optionItem">
                         <span className="optionText">Adult</span>
                         <div className="optionCounter">
                           <button
+                            type="button" aria-label="Fewer adults"
                             disabled={options.adult <= 1}
                             className="optionCounterButton"
                             onClick={() => handleOption("adult", "d")}
@@ -142,6 +158,7 @@ import { AuthContext } from "../../context/AuthContext";
                             {options.adult}
                           </span>
                           <button
+                            type="button" aria-label="More adults"
                             className="optionCounterButton"
                             onClick={() => handleOption("adult", "i")}
                           >
@@ -153,6 +170,7 @@ import { AuthContext } from "../../context/AuthContext";
                         <span className="optionText">Children</span>
                         <div className="optionCounter">
                           <button
+                            type="button" aria-label="Fewer children"
                             disabled={options.children <= 0}
                             className="optionCounterButton"
                             onClick={() => handleOption("children", "d")}
@@ -163,6 +181,7 @@ import { AuthContext } from "../../context/AuthContext";
                             {options.children}
                           </span>
                           <button
+                            type="button" aria-label="More children"
                             className="optionCounterButton"
                             onClick={() => handleOption("children", "i")}
                           >
@@ -174,6 +193,7 @@ import { AuthContext } from "../../context/AuthContext";
                         <span className="optionText">Room</span>
                         <div className="optionCounter">
                           <button
+                            type="button" aria-label="Fewer rooms"
                             disabled={options.room <= 1}
                             className="optionCounterButton"
                             onClick={() => handleOption("room", "d")}
@@ -184,6 +204,7 @@ import { AuthContext } from "../../context/AuthContext";
                             {options.room}
                           </span>
                           <button
+                            type="button" aria-label="More rooms"
                             className="optionCounterButton"
                             onClick={() => handleOption("room", "i")}
                           >
@@ -195,17 +216,19 @@ import { AuthContext } from "../../context/AuthContext";
                   )}
                 </div>
                 <div className="headerSearchItem">
-                  <button className="headerBtn" onClick={handleSearch}>
+                  <button type="submit" className="headerBtn">
                     Search <FaLongArrowAltRight />
                   </button>
                 </div>
-              </div>
+              </form>
+              {searchError && <div className="searchError" role="alert">{searchError}</div>}
             </>
           )}
         </div>
       </div>
     );
   };
-  
+
+  Header.propTypes = { type: PropTypes.string };
   export default Header;
-  
+

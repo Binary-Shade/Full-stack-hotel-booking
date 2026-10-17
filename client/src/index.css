@@ -5,3 +5,8 @@
     font-family: 'poppins', monospace;
     text-decoration: none;
 }
+
+a { color: inherit; }
+button:disabled { cursor: not-allowed; opacity: .6; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #febb02; outline-offset: 3px; }
+.notFound { padding: 48px; text-align: center; }

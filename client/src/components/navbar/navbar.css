@@ -39,7 +39,11 @@
   }
   .navItems {
     display: flex;
+    align-items: center;
   }
+
+  .navRegister { color: white; }
+  .navButton { background: #f0f0f0; font-size: 14px; }
 
   .navButton{
     margin-left: 20px;

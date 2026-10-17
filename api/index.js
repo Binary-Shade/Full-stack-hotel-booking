@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import { apiCorsOptions } from './config/cors.js';
 import helmet from 'helmet';
 import dotenv from "dotenv";
 import authRoute from './routes/auth.js'
@@ -20,11 +21,25 @@ cloudinary.config({
 
 
 const app = express();
+// SE4030 SECURITY FIX - Z6
+// Vulnerability: X-Content-Type-Options Header Missing; Detection: OWASP ZAP.
+// Original: parsers and CORS could respond before the full Helmet middleware.
+// Fix: set nosniff before those early responses; retain all existing controls.
+app.use(helmet.xContentTypeOptions());
 app.use(cookieParser())
 app.use(json());
-app.use(cors({
-    origin: 'http://localhost:5173',
-}));
+// SE4030 SECURITY FIX - Z3
+// Vulnerability: Cross-Domain Misconfiguration; Detection: OWASP ZAP.
+// ORIGINAL CONFIGURATION (DISABLED; already restricted to one frontend):
+// app.use(cors({
+//     origin: 'http://localhost:5173',
+// }));
+// Fix: exact client/admin allowlist; credential permission only for matches.
+app.use((req, res, next) => {
+    res.vary('Origin'); // Keep allowed and denied responses distinct in caches.
+    next();
+});
+app.use(cors(apiCorsOptions()));
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -41,6 +56,20 @@ app.use('/api/auth', authRoute)
 app.use('/api/users', usersRoute)
 app.use('/api/hotels', hotelsRoute)
 app.use('/api/rooms', roomsRoute)
+
+// SE4030 SECURITY FIX - Z1
+// Vulnerability: CSP: Failure to Define Directive with No Fallback
+// Detection: OWASP ZAP
+// Original: no explicit 404 handler; Express replaced Helmet's CSP with
+// default-src 'none', omitting frame-ancestors and form-action.
+// Fix: return JSON for unmatched routes and preserve Helmet's explicit policy.
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        status: 404,
+        message: 'route not found',
+    });
+});
 
 // mongodb connection
 const main = async () => {

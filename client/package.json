@@ -15,6 +15,7 @@
     "@react-oauth/google": "^0.13.5",
     "axios": "^1.7.5",
     "date-fns": "^3.6.0",
+    "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-date-range": "^2.0.1",
     "react-dom": "^18.3.1",

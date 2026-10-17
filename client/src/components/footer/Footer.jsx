@@ -1,54 +1,35 @@
-import "./footer.css";
+import './footer.css';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+const groups = [
+  ['Countries', 'Regions', 'Cities', 'Districts', 'Airports', 'Hotels'],
+  ['Homes', 'Apartments', 'Resorts', 'Villas', 'Hostels', 'Guest houses'],
+  ['Unique places to stay', 'Reviews', 'Unpacked: Travel articles', 'Travel communities', 'Seasonal and holiday deals'],
+  ['Car rental', 'Flight Finder', 'Restaurant reservations', 'Travel Agents'],
+  ['Customer Service', 'Partner Help', 'Careers', 'Sustainability', 'Press center', 'Safety Resource Center', 'Investor relations', 'Terms & conditions'],
+];
+const destinations = {
+  Cities: '/hotels', Hotels: '/hotels?type=hotel', Homes: '/hotels',
+  Apartments: '/hotels?type=apartment', Resorts: '/hotels?type=resort',
+  Villas: '/hotels?type=villa', Hostels: '/hotels?type=hostel', 'Guest houses': '/hotels?type=guest+house',
+  'Unique places to stay': '/hotels',
+};
 
 const Footer = () => {
-  const year = new Date().getFullYear()
-
-  return (
-    <div className="footer">
-      <div className="fLists">
-        <ul className="fList">
-          <li className="fListItem">Countries</li>
-          <li className="fListItem">Regions</li>
-          <li className="fListItem">Cities</li>
-          <li className="fListItem">Districts</li>
-          <li className="fListItem">Airports</li>
-          <li className="fListItem">Hotels</li>
-        </ul>
-        <ul className="fList">
-          <li className="fListItem">Homes </li>
-          <li className="fListItem">Apartments </li>
-          <li className="fListItem">Resorts </li>
-          <li className="fListItem">Villas</li>
-          <li className="fListItem">Hostels</li>
-          <li className="fListItem">Guest houses</li>
-        </ul>
-        <ul className="fList">
-          <li className="fListItem">Unique places to stay </li>
-          <li className="fListItem">Reviews</li>
-          <li className="fListItem">Unpacked: Travel articles </li>
-          <li className="fListItem">Travel communities </li>
-          <li className="fListItem">Seasonal and holiday deals </li>
-        </ul>
-        <ul className="fList">
-          <li className="fListItem">Car rental </li>
-          <li className="fListItem">Flight Finder</li>
-          <li className="fListItem">Restaurant reservations </li>
-          <li className="fListItem">Travel Agents </li>
-        </ul>
-        <ul className="fList">
-          <li className="fListItem">Curtomer Service</li>
-          <li className="fListItem">Partner Help</li>
-          <li className="fListItem">Careers</li>
-          <li className="fListItem">Sustainability</li>
-          <li className="fListItem">Press center</li>
-          <li className="fListItem">Safety Resource Center</li>
-          <li className="fListItem">Investor relations</li>
-          <li className="fListItem">Terms & conditions</li>
-        </ul>
-      </div>
-      <div className="fText">Copyright © {year} BookNRest</div>
-    </div>
-  );
+  const [notice, setNotice] = useState('');
+  return <footer className="footer">
+    <nav className="fLists" aria-label="Explore Book N Rest">
+      {groups.map((group, index) => <ul className="fList" key={index}>
+        {group.map(label => <li className="fListItem" key={label}>
+          {destinations[label] ? <Link to={destinations[label]}>{label}</Link>
+            : <button type="button" onClick={() => setNotice(label + ': Coming soon.')}>{label}</button>}
+        </li>)}
+      </ul>)}
+    </nav>
+    {notice && <div className="footerNotice" role="status">{notice}<button type="button" onClick={() => setNotice('')} aria-label="Dismiss footer notice">×</button></div>}
+    <div className="fText">Copyright &copy; {new Date().getFullYear()} BookNRest</div>
+  </footer>;
 };
 
 export default Footer;

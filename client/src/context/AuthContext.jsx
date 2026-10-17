@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
+import PropTypes from 'prop-types';
 
 // Initial state
 // SECURITY: only non-sensitive display fields are kept, in sessionStorage
@@ -6,7 +7,7 @@ import { createContext, useContext, useEffect, useReducer } from "react";
 const toSafeUser = (u) => u ? { _id: u._id, username: u.username, img: u.img } : null;
 
 const loadUser = () => {
-    try { return JSON.parse(sessionStorage.getItem("user")) } catch { return null }
+    try { return toSafeUser(JSON.parse(sessionStorage.getItem("user"))) } catch { return null }
 };
 
 const INIT = {
@@ -29,7 +30,7 @@ const AuthReducer = (state, action) => {
             }
         case "LOGIN_SUCCESS":
             return {
-                user: action.payload,
+                user: toSafeUser(action.payload),
                 loading: false,
                 error : null
             }
@@ -81,3 +82,4 @@ export const AuthContextProvider = ({ children }) => {
 export const useAuthContext = () => {
     return useContext(AuthContext);
 };
+AuthContextProvider.propTypes = { children: PropTypes.node.isRequired };

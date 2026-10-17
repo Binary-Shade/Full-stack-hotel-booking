@@ -64,7 +64,7 @@ export const getAllHotel = async (req, res, next) => {
         // console.log(`Limit: ${lim}`);
         // console.log('Hotels:', hotels.length);
         
-        const { city, type, featured, limit } = req.query;
+        const { city, type, featured, limit, min, max } = req.query;
         // allow-list: only these filters, and only plain text (blocks $ne, $regex...)
         const filter = {};
         if (city !== undefined) {
@@ -76,6 +76,19 @@ export const getAllHotel = async (req, res, next) => {
             filter.type = type;
         }
         if (featured === 'true' || featured === 'false') filter.featured = featured === 'true';
+        const price = {};
+        for (const [key, value, operator] of [['min', min, '$gte'], ['max', max, '$lte']]) {
+            if (value !== undefined) {
+                if (typeof value !== 'string' || value.trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0) {
+                    return next(createError(400, `invalid ${key} price`));
+                }
+                price[operator] = Number(value);
+            }
+        }
+        if (price.$gte !== undefined && price.$lte !== undefined && price.$gte > price.$lte) {
+            return next(createError(400, 'minimum price cannot exceed maximum price'));
+        }
+        if (Object.keys(price).length) filter.cheapestPrice = price;
         const lim = Math.min(parseInt(limit) || 40, 100);
         const hotels = await Hotel.find(filter).limit(lim)
 

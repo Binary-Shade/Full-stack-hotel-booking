@@ -1,11 +1,12 @@
 import { FaStar } from "react-icons/fa";
 import "./search.css";
 import {Link} from 'react-router-dom'
+import PropTypes from 'prop-types';
 const SearchItem = ({item}) => {
   return (
     <div className="searchItem">
       <img
-        src={item.photos[0]}
+        src={item.photos?.[0]}
         // src="https://cf.bstatic.com/xdata/images/hotel/square600/261707778.webp?k=fa6b6128468ec15e81f7d076b6f2473fa3a80c255582f155cae35f9edbffdd78&o=&s=1"
         alt="hotel photo"
         className="siImg"
@@ -36,13 +37,16 @@ const SearchItem = ({item}) => {
         <div className="siDetailTexts">
           <span className="siPrice">${item.cheapestPrice}</span>
           <span className="siTaxOp">Includes taxes and fees</span>
-          <Link to={`/hotels/${item._id}`}>
-            <button className="siCheckButton">See availability</button>
-          </Link>
+          <Link className="siCheckButton" to={`/hotels/${item._id}`}>See availability</Link>
         </div>
       </div>
     </div>
   );
 };
 
+SearchItem.propTypes = { item: PropTypes.shape({
+  _id: PropTypes.string.isRequired, name: PropTypes.string, photos: PropTypes.arrayOf(PropTypes.string),
+  distance: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), desc: PropTypes.string,
+  rating: PropTypes.number, cheapestPrice: PropTypes.number,
+}).isRequired };
 export default SearchItem;

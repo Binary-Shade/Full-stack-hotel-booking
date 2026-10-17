@@ -1,65 +1,54 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from 'react';
+import PropTypes from 'prop-types';
 
-// Initial state
-const INIT = {
-    city: undefined,
-    date: [],
-    options: {
-        adult: undefined,
-        children: undefined,
-        room: undefined,
-    },
+const defaults = () => ({
+  city: '', destination: '',
+  date: [{ startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 1)), key: 'selection' }],
+  options: { adult: 1, children: 0, room: 1 },
+});
+
+const normalize = (saved) => {
+  const fallback = defaults();
+  const range = saved?.date?.[0];
+  const startDate = new Date(range?.startDate);
+  const endDate = new Date(range?.endDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const options = Object.fromEntries(Object.entries(fallback.options).map(([key, minimum]) => {
+    const value = Number(saved?.options?.[key]);
+    return [key, Number.isInteger(value) && value >= minimum ? value : minimum];
+  }));
+  const city = saved?.destination ?? saved?.city ?? '';
+  return {
+    city, destination: city, options,
+    date: startDate >= today && endDate > startDate
+      ? [{ startDate, endDate, key: 'selection' }] : fallback.date,
+  };
 };
 
-// Create the context
-export const SearchContext = createContext(INIT);
+const loadSearch = () => {
+  try { return normalize(JSON.parse(localStorage.getItem('searchState'))); }
+  catch { return defaults(); }
+};
 
-// Reducer function with localStorage persistence
+export const SearchContext = createContext(defaults());
+
 const searchReducer = (state, action) => {
-    switch (action.type) {
-        case "NEW_SEARCH":
-            const newState = action.payload;
-            localStorage.setItem("searchState", JSON.stringify(newState)); // Save state to localStorage
-            return newState;
-        case "RESET_SEARCH":
-            localStorage.removeItem("searchState"); // Clear state from localStorage
-            return INIT;
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case 'NEW_SEARCH': return normalize({ ...state, ...action.payload });
+    case 'RESET_SEARCH': return defaults();
+    default: return state;
+  }
 };
 
 export const SearchContextProvider = ({ children }) => {
-    let initialState = INIT;
-
-    try {
-        const savedState = localStorage.getItem("searchState");
-        if (savedState) {
-            initialState = JSON.parse(savedState);
-        }
-    } catch (error) {
-        console.error("Failed to parse search state from localStorage:", error);
-        localStorage.removeItem("searchState"); // Remove corrupted data
-    }
-
-    const [state, dispatch] = useReducer(searchReducer, initialState);
-
-    return (
-        <SearchContext.Provider
-            value={{
-                city: state.city,
-                date: state.date,
-                options: state.options,
-                dispatch,
-            }}
-        >
-            {children}
-        </SearchContext.Provider>
-    );
+  const [state, dispatch] = useReducer(searchReducer, undefined, loadSearch);
+  useEffect(() => {
+    try { localStorage.setItem('searchState', JSON.stringify(state)); }
+    catch { /* Search continues when browser storage is unavailable. */ }
+  }, [state]);
+  return <SearchContext.Provider value={{ ...state, dispatch }}>{children}</SearchContext.Provider>;
 };
 
-
-// Hook to use the search context
-export const useSearchContext = () => {
-    return useContext(SearchContext);
-};
+export const useSearchContext = () => useContext(SearchContext);
+SearchContextProvider.propTypes = { children: PropTypes.node.isRequired };
